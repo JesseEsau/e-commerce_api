@@ -10,13 +10,6 @@ DEBUG = config('DEBUG', default=True, cast=bool)  # Load DEBUG, default to True
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(
     ',')  # Comma-separated list
 
-# SECRET_KEY = 'django-insecure-!&1i@se=(019^oy-5^(b%zgmd6&%1+1wnbyue^gkthjeb(wtxh'
-
-# DEBUG = True
-
-# ALLOWED_HOSTS = []
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -28,6 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'products',
+    'user',
 ]
 
 MIDDLEWARE = [

@@ -1,4 +1,5 @@
 from django.db import models
+from users.models import CustomUser
 
 
 class Product(models.Model):
@@ -25,3 +26,14 @@ class Product(models.Model):
             self.save()
         else:
             raise ValueError("Out of stock stock!")
+
+#rating
+class Review(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    rating = models.PositiveSmallIntegerField()  # 1-5 scale
+    comment = models.TextField(blank=True, null=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Review by {self.user.username} for {self.product.name}"

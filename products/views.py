@@ -1,5 +1,7 @@
 from rest_framework import generics, filters
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import permissions
+
 from .models import Product
 from .serializers import ProductSerializer
 from .pagination import ProductPagination
@@ -8,6 +10,8 @@ from .pagination import ProductPagination
 
 
 class ProductListCreateView(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 

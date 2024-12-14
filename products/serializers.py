@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Product
-from .models import Product, Review
+from .models import Product, Review, Category
 
 #serialize product
 class ProductSerializer(serializers.ModelSerializer):
@@ -32,4 +32,16 @@ class ReviewSerializer(serializers.ModelSerializer):
     def validate_rating(self, value):
         if value < 1 or value > 5:
             raise serializers.ValidationError("Rating must be between 1 and 5.")
+        return value
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'created_date']  # Include the fields you want to expose
+        read_only_fields = ['id', 'created_date']
+
+    def validate_name(self, value):
+        if Category.objects.filter(name__iexact=value).exists():
+            raise serializers.ValidationError("A category with this name already exists.")
         return value

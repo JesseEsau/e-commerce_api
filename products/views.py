@@ -1,8 +1,8 @@
 from rest_framework import serializers, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, generics
-from .models import Product, Review
-from .serializers import ProductSerializer, ReviewSerializer
+from .models import Product, Review, Category
+from .serializers import ProductSerializer, ReviewSerializer, CategorySerializer
 from .pagination import ProductPagination
 
 # List and Create Products
@@ -62,3 +62,15 @@ class ProductReviewListView(generics.ListAPIView):
     def get_queryset(self):
         product_id = self.kwargs['product_id']
         return Review.objects.filter(product_id=product_id)
+
+
+class CategoryListCreateView(generics.ListCreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]  # Authenticated users can create
+
+# Retrieve, Update, and Delete a Category
+class CategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]  # Authenticated users can edit/delete

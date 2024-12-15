@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Product
-from .models import Product, Review, Category, Wishlist
+from .models import Product, Review, Category, Wishlist, Order
 
 #serialize product
 class ProductSerializer(serializers.ModelSerializer):
@@ -63,3 +63,23 @@ class WishlistSerializer(serializers.ModelSerializer):
         model = Wishlist
         fields = ['id', 'user', 'product', 'added_date']
         read_only_fields = ['id', 'user', 'added_date']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    product_name = serializers.ReadOnlyField(source='product.name')  # Include product name in response
+
+    class Meta:
+        model = Order
+        fields = ['id', 'user', 'product', 'product_name', 'quantity', 'reserved', 'created_date']
+        read_only_fields = ['id', 'user', 'product_name', 'created_date']
+
+    def validate_quantity(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Quantity must be greater than zero.")
+        return value
+
+    def validate(self, data):
+        product = data['product']
+        if product.stock_quantity < data['quantity']:
+            raise serializers.ValidationError("Insufficient stock available for this product.")
+        return data

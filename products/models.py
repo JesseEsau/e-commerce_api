@@ -31,7 +31,7 @@ class Product(models.Model):
             self.stock_quantity -= quantity
             self.save()
         else:
-            raise ValueError("Out of stock stock!")
+            raise ValueError("Insufficient stock!")
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
@@ -66,3 +66,22 @@ class Wishlist(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.product.name}"
+
+
+class Order(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='orders')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='orders')
+    quantity = models.PositiveIntegerField()
+    reserved = models.BooleanField(default=True)  # Mark as reserved or purchased
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        """
+        Automatically reduce stock when an order is created.
+        """
+        if not self.pk:  # Only reduce stock for new orders
+            self.product.reduce_stock(self.quantity)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Order by {self.user.username} for {self.product.name}"

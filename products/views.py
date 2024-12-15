@@ -1,8 +1,8 @@
 from rest_framework import serializers, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, generics
-from .models import Product, Review, Category, ProductImage, Wishlist
-from .serializers import ProductSerializer, ReviewSerializer, CategorySerializer, ProductImageSerializer, WishlistSerializer
+from .models import Product, Review, Category, ProductImage, Wishlist, Order
+from .serializers import ProductSerializer, ReviewSerializer, CategorySerializer, ProductImageSerializer, WishlistSerializer, OrderSerializer
 from .pagination import ProductPagination
 
 # List and Create Products
@@ -113,3 +113,18 @@ class WishlistRemoveView(generics.DestroyAPIView):
     def get_queryset(self):
         # Allow users to remove items from their own wishlist
         return Wishlist.objects.filter(user=self.request.user)
+
+
+# List and Create Orders
+class OrderListCreateView(generics.ListCreateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Return orders for the logged-in user
+        return Order.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        # Automatically associate the order with the logged-in user
+        serializer.save(user=self.request.user)

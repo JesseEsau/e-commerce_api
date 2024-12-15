@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Product
-from .models import Product, Review, Category
+from .models import Product, Review, Category, Wishlist
 
 #serialize product
 class ProductSerializer(serializers.ModelSerializer):
@@ -19,6 +19,15 @@ class ProductSerializer(serializers.ModelSerializer):
         if not data.get('name'):
             raise serializers.ValidationError({"name": "Name is required."})
         return data
+
+from rest_framework import serializers
+from .models import Product, ProductImage
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['id', 'product', 'image', 'uploaded_date']
+        read_only_fields = ['id', 'uploaded_date']
 
 #serialize reviews
 class ReviewSerializer(serializers.ModelSerializer):
@@ -45,3 +54,12 @@ class CategorySerializer(serializers.ModelSerializer):
         if Category.objects.filter(name__iexact=value).exists():
             raise serializers.ValidationError("A category with this name already exists.")
         return value
+
+
+class WishlistSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True)  # Show username instead of user ID
+
+    class Meta:
+        model = Wishlist
+        fields = ['id', 'user', 'product', 'added_date']
+        read_only_fields = ['id', 'user', 'added_date']

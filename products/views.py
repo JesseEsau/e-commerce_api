@@ -1,8 +1,8 @@
 from rest_framework import serializers, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, generics
-from .models import Product, Review, Category
-from .serializers import ProductSerializer, ReviewSerializer, CategorySerializer
+from .models import Product, Review, Category, ProductImage, Wishlist
+from .serializers import ProductSerializer, ReviewSerializer, CategorySerializer, ProductImageSerializer, WishlistSerializer
 from .pagination import ProductPagination
 
 # List and Create Products
@@ -63,6 +63,19 @@ class ProductReviewListView(generics.ListAPIView):
         product_id = self.kwargs['product_id']
         return Review.objects.filter(product_id=product_id)
 
+class ProductImageListCreateView(generics.ListCreateAPIView):
+    queryset = ProductImage.objects.all()
+    serializer_class = ProductImageSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save()  # Automatically links user and product
+
+class ProductImageDetailView(generics.RetrieveDestroyAPIView):
+    queryset = ProductImage.objects.all()
+    serializer_class = ProductImageSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
 
 class CategoryListCreateView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
@@ -74,3 +87,29 @@ class CategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]  # Authenticated users can edit/delete
+
+
+
+class WishlistListView(generics.ListAPIView):
+    serializer_class = WishlistSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Return wishlist items for the logged-in user
+        return Wishlist.objects.filter(user=self.request.user)
+
+class WishlistAddView(generics.CreateAPIView):
+    serializer_class = WishlistSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        # Associate the wishlist item with the logged-in user
+        serializer.save(user=self.request.user)
+
+class WishlistRemoveView(generics.DestroyAPIView):
+    serializer_class = WishlistSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Allow users to remove items from their own wishlist
+        return Wishlist.objects.filter(user=self.request.user)

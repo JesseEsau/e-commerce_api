@@ -33,6 +33,17 @@ class Product(models.Model):
         else:
             raise ValueError("Out of stock stock!")
 
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='product_images/')
+    uploaded_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['uploaded_date']
+
+    def __str__(self):
+        return f"Image for {self.product.name}"
+
 #rating
 class Review(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
@@ -44,3 +55,14 @@ class Review(models.Model):
     def __str__(self):
         return f"Review by {self.user.username} for {self.product.name}"
 
+
+class Wishlist(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='wishlist')
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='wishlisted_by')
+    added_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'product')  # Prevent duplicate wishlist entries for the same product by the same user
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.name}"
